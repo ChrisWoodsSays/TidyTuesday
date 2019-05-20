@@ -41,6 +41,7 @@ g = ggplot(counts, aes(x = birthCountryName, y = category,
     scale_size_continuous(range = c(2, 40)) +
     transition_reveal(prize_year) + 
     labs(title = 'Top 10 Nobel Prize Winning Countries', 
+         subtitle = "Year: {frame_along}",
          y = 'Prize Category') + 
     theme_minimal() + 
     theme(
