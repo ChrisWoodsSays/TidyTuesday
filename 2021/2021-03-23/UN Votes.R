@@ -1,7 +1,7 @@
 # Load packages
 #install.packages("pacman")
 pacman::p_load(tidyverse, lubridate, stringi, 
-               unvotes, DataExplorer, hrbrthemes, wesanderson)
+               unvotes, hrbrthemes, wesanderson)
 
 hrbrthemes::import_roboto_condensed()
 
@@ -91,23 +91,27 @@ g <- ggplot() +
         strip.text.x = element_text(hjust = 0.5),
         strip.text.y = element_text(hjust = 0.5, size = 10),
         panel.grid.minor.x = element_blank(),
-        panel.spacing.x = unit(0, "lines"), # Remove spacing between facets
-        panel.spacing.y = unit(0, "lines"), # Remove spacing between facets
+        panel.spacing.x = unit(0, "lines"), # Remove horizontal spacing between facets
+        panel.spacing.y = unit(0, "lines"), # Remove vertical pacing between facets
         plot.title.position = "plot"
   ) +
   labs(title = "UN Votes - How the UK votes differently to others",
-       subtitle = "1946 - 2019. Compared to US News' 'Power Countries'",
-       caption = "V.0.2, 26.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: github.com/rfordatascience/tidytuesday, www.usnews.com/news/best-countries/power-rankings") +
+       subtitle = "Compared to US News 'Power Countries', 1946 - 2019",
+       caption = "V.0.3, 26.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: github.com/rfordatascience/tidytuesday, www.usnews.com/news/best-countries/power-rankings") +
   facet_grid(vars(issue), vars(country),
              labeller = label_wrap_gen(width = 20, multi_line = TRUE))
 
 # Create non radial legend with a sample of data
-dataLegend <- data  %>% filter(country_code != "CN" & issue == "Human rights") %>% tail(400)
+dataLegend <- data  %>% filter(country_code == "RU" & issue == "Human rights") 
+dataLegend$comparison = factor(dataLegend$comparison, levels=c('UK+','Same','UK-'))
 legend <- ggplot() +
   geom_ribbon(data = dataLegend %>% filter(comparison == "Same"), aes(x = year, ymin = middleLine - count/2, ymax = middleLine + count/2, fill = comparison), alpha = alpha/1, stat="identity", colour = NA) +
-  geom_ribbon(data = dataLegend %>% filter(comparison == "UK+"), aes(x = year, ymin = outerLine, ymax = outerLine + count, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
-  geom_ribbon(data = dataLegend %>% filter(comparison == "UK-"), aes(x = year, ymin = innerLine, ymax = innerLine - count, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
+  geom_ribbon(data = dataLegend %>% filter(comparison == "UK+"),
+              aes(x = year, ymin = 20, ymax = 20 + count, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
+  geom_ribbon(data = dataLegend %>% filter(comparison == "UK-"),
+              aes(x = year, ymin = 25 - count/3, ymax = 25, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
   theme_ft_rc() +
+  coord_polar(direction=1) +
   scale_fill_manual(values = Darjeeling1) +
   theme(legend.position = "none",
         axis.text.x = element_blank(), axis.title.x = element_blank(),
@@ -116,7 +120,10 @@ legend <- ggplot() +
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         panel.grid.major.y = element_blank(),
-        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"))
+        panel.spacing.x = unit(6, "lines"), # Increase horizontal spacing between facets
+        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"),
+        strip.text.x = element_blank()) +
+  facet_wrap(vars(comparison))
 
 # Add facets, text and legend together and plot
 cowplot::ggdraw(g) +
@@ -125,7 +132,7 @@ cowplot::ggdraw(g) +
   cowplot::draw_label(startYear + 30, x = 0.162, y = 0.738, colour = "#929299", size = 6) + # 1976
   cowplot::draw_label(startYear + 45, x = 0.098, y = 0.742, colour = "#929299", size = 6) + # 1991
   cowplot::draw_label(startYear + 60, x = 0.087, y = 0.82, colour = "#929299", size = 6) + # 2006
-  cowplot::draw_label("UK votes Yes vs No or abstain", x = 0.81, y = 0.955, colour = "#929299", size = 8, hjust = 1) +
-  cowplot::draw_label("UK agrees", x = 0.81, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
-  cowplot::draw_label("UK votes No or abstains vs Yes", x = 0.81, y = 0.915, colour = "#929299", size = 8, hjust = 1) +
-  cowplot::draw_plot(legend, .81, .89, .075, .08)
+  cowplot::draw_plot(legend, .47, .89, .55, .08) +
+  cowplot::draw_label("UK votes Yes\nvs No or abstain", x = 0.585, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
+  cowplot::draw_label("UK votes\nthe same", x = 0.72, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
+  cowplot::draw_label("UK votes No or abstains\nvs Yes", x = 0.859, y = 0.937, colour = "#929299", size = 8, hjust = 1)
