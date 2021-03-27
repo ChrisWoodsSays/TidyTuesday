@@ -25,7 +25,9 @@ votes <- un_votes %>%
   left_join(un_roll_call_issues, by = "rcid") %>% select(-short_name) %>%
   filter(country_code %in% powerCountries) %>%
   # Rename German Democratic Republic to GDR
-  mutate(country = if_else(country_code == "DD", "GDR", country)) %>%
+  mutate(country = if_else(country_code == "DD", "GDR", country),
+  # Shorten Nuclear Title
+        issue = if_else(issue == "Nuclear weapons and nuclear material", "Nuclear weapons and material", as.character(issue))) %>%
   mutate(year = lubridate::year(date)) 
 
 # Get just UK votes
@@ -102,7 +104,7 @@ g <- ggplot() +
        caption = "V.0.4, 27.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-03-23, www.usnews.com/news/best-countries/power-rankings") +
   
   facet_grid(vars(issue), vars(country),
-             labeller = label_wrap_gen(width = 20, multi_line = TRUE))
+             labeller = label_wrap_gen(width = 18, multi_line = TRUE))
 
 # Create non radial legend with a sample of data
 dataLegend <- data  %>% filter(country_code == "RU" & issue == "Human rights") 
