@@ -99,7 +99,8 @@ g <- ggplot() +
   ) +
   labs(title = "UN Votes - How the UK votes differently to others",
        subtitle = "Compared to US News 'Power Countries', 1946 - 2019",
-       caption = "V.0.4, 27.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: github.com/rfordatascience/tidytuesday, www.usnews.com/news/best-countries/power-rankings") +
+       caption = "V.0.4, 27.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-03-23, www.usnews.com/news/best-countries/power-rankings") +
+  
   facet_grid(vars(issue), vars(country),
              labeller = label_wrap_gen(width = 20, multi_line = TRUE))
 
