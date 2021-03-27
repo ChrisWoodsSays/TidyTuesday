@@ -99,7 +99,7 @@ g <- ggplot() +
   ) +
   labs(title = "UN Votes - How the UK votes differently to others",
        subtitle = "Compared to US News 'Power Countries', 1946 - 2019",
-       caption = "V.0.3, 26.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: github.com/rfordatascience/tidytuesday, www.usnews.com/news/best-countries/power-rankings") +
+       caption = "V.0.4, 27.3.2021  |  Visualisation by @ChrisWoodsSays  |  Data: github.com/rfordatascience/tidytuesday, www.usnews.com/news/best-countries/power-rankings") +
   facet_grid(vars(issue), vars(country),
              labeller = label_wrap_gen(width = 20, multi_line = TRUE))
 
@@ -127,16 +127,21 @@ legend <- ggplot() +
         strip.text.x = element_blank()) +
   facet_wrap(vars(comparison))
 
-# Shift years to left as facets move when an extra country is added
-shift = - 0.043
+# Shift years to left as facets move when an extra country is added or iamge size changed
+xShift = - 0.050
+yShift = - 0.0190
 # Add facets, text and legend together and plot
-cowplot::ggdraw(g) +
-  cowplot::draw_label(startYear, x = 0.140 + shift, y = 0.856, colour = "#929299", size = 6) + # 1946
-  cowplot::draw_label(startYear + 15, x = 0.163 + shift, y = 0.815, colour = "#929299", size = 6) + # 1961
-  cowplot::draw_label(startYear + 30, x = 0.162 + shift, y = 0.738, colour = "#929299", size = 6) + # 1976
-  cowplot::draw_label(startYear + 45, x = 0.098 + shift, y = 0.742, colour = "#929299", size = 6) + # 1991
-  cowplot::draw_label(startYear + 60, x = 0.087 + shift, y = 0.82, colour = "#929299", size = 6) + # 2006
-  cowplot::draw_plot(legend, .47, .89, .55, .08) +
-  cowplot::draw_label("UK votes Yes\nvs No or abstain", x = 0.585, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
-  cowplot::draw_label("UK votes\nthe same", x = 0.72, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
-  cowplot::draw_label("UK votes No or abstains\nvs Yes", x = 0.862, y = 0.937, colour = "#929299", size = 8, hjust = 1)
+plot <- cowplot::ggdraw(g) +
+  cowplot::draw_label(startYear, x = 0.140 + xShift, y = 0.856 + yShift, colour = "#929299", size = 6) + # 1946
+  cowplot::draw_label(startYear + 15, x = 0.163 + xShift, y = 0.815 + yShift, colour = "#929299", size = 6) + # 1961
+  cowplot::draw_label(startYear + 30, x = 0.162 + xShift, y = 0.738 + yShift, colour = "#929299", size = 6) + # 1976
+  cowplot::draw_label(startYear + 45, x = 0.098 + xShift, y = 0.742 + yShift, colour = "#929299", size = 6) + # 1991
+  cowplot::draw_label(startYear + 60, x = 0.087 + xShift, y = 0.82 + yShift, colour = "#929299", size = 6) + # 2006
+  cowplot::draw_plot(legend, .5, .89, .55, .08) +
+  cowplot::draw_label("UK votes Yes\nvs No or abstain", x = 0.595, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
+  cowplot::draw_label("UK votes\nthe same", x = 0.747, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
+  cowplot::draw_label("UK votes No or abstains\nvs Yes", x = 0.908, y = 0.937, colour = "#929299", size = 8, hjust = 1)
+
+ggsave(here::here("2021", "2021-03-23", "output", "HowTheUKVotesAtTheUN.png"), plot, device = "png", width = 29.65, height = 21, 
+       units = "cm")
+
