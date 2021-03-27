@@ -1,9 +1,13 @@
 # TidyTuesday
 
 ### [2019-05-20](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-14)  Nobel Prizes
+
 A simple animation of Nobel Prizes over time, by country and prize, for the most commonly awarded countries.
 
-![UN Votes - How the UK votes differently to others](2019/2019-05-20/nobelprizes.gif)
+![Nobel Prize Winners](2019/2019-05-20/nobelprizes.gif)
+\
+\
+\
 
 ### [2021-03-23](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-03-23) UN Votes - How the UK votes differently to others
 
