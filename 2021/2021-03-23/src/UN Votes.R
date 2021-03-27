@@ -24,9 +24,8 @@ votes <- un_votes %>%
   # Get issue for each one
   left_join(un_roll_call_issues, by = "rcid") %>% select(-short_name) %>%
   filter(country_code %in% powerCountries) %>%
-  # Merge FDR & Germany
-  mutate(country_code = if_else(country_code %in% c("DD", "DE"), "DE", country_code),
-         country = if_else(country_code == "DE", "Germany", country)) %>%
+  # Rename German Democratic Republic to GDR
+  mutate(country = if_else(country_code == "DD", "GDR", country)) %>%
   mutate(year = lubridate::year(date)) 
 
 # Get just UK votes
@@ -39,7 +38,8 @@ ukVotesByIssue <- votes %>%
 # And pair them with others
 ukVotesPairedWithOthers <- ukVotesByIssue %>% 
   left_join(votes %>% rename(countryVote = vote), by = c("issue", "rcid")) %>%
-  select(rcid, issue, ukVote, country_code, country, countryVote, year)
+  select(rcid, issue, ukVote, country_code, country, countryVote, year) %>%
+  filter(country_code != "GB")
 
 # Compare and group
 ukVotesVariance <- ukVotesPairedWithOthers %>%
@@ -60,10 +60,12 @@ startYear <- min(votes$year)
 endYear <- max(votes$year)
 
 # Filter down to the ones we want to visualise
-# Exclude Korea / Palestinian conflict as for some reason, the following error is displayed if is included
-# Error in `$<-.data.frame`(`*tmp*`, "dist", value = NA_real_) : 
-#   replacement has 1 row, data has 0
-data <- ukVotesVariance %>% filter(comparison %in% c("UK+", "UK-", "Same") & country_code != "GB" & (country_code != "KR" | issue != "Palestinian conflict"))
+data <- ukVotesVariance %>% filter(comparison %in% c("UK+", "UK-", "Same"))
+extras <- rbind(data.frame(country='South Korea', country_code='KR', issue='Palestinian conflict', year=2013, comparison='UK+', count=0),
+                data.frame(country='Germany', country_code='DE', issue='Palestinian conflict', year=2013, comparison='UK+', count=0),
+                data.frame(country='Germany', country_code='DE', issue='Colonialism', year=2013, comparison='UK+', count=0),
+                data.frame(country='Germany', country_code='DE', issue='Economic development', year=2004, comparison='UK+', count=0))
+data <- rbind(data, extras)
 
 scaleFactor = 0.66
 innerLine <- 20 * scaleFactor
@@ -109,7 +111,7 @@ legend <- ggplot() +
   geom_ribbon(data = dataLegend %>% filter(comparison == "UK+"),
               aes(x = year, ymin = 20, ymax = 20 + count, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
   geom_ribbon(data = dataLegend %>% filter(comparison == "UK-"),
-              aes(x = year, ymin = 25 - count/3, ymax = 25, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
+              aes(x = year, ymin = 23 - count/3, ymax = 23, fill = comparison), alpha = alpha, stat="identity", colour = NA) +
   theme_ft_rc() +
   coord_polar(direction=1) +
   scale_fill_manual(values = Darjeeling1) +
@@ -125,14 +127,16 @@ legend <- ggplot() +
         strip.text.x = element_blank()) +
   facet_wrap(vars(comparison))
 
+# Shift years to left as facets move when an extra country is added
+shift = - 0.043
 # Add facets, text and legend together and plot
 cowplot::ggdraw(g) +
-  cowplot::draw_label(startYear, x = 0.140, y = 0.856, colour = "#929299", size = 6) + # 1946
-  cowplot::draw_label(startYear + 15, x = 0.163, y = 0.815, colour = "#929299", size = 6) + # 1961
-  cowplot::draw_label(startYear + 30, x = 0.162, y = 0.738, colour = "#929299", size = 6) + # 1976
-  cowplot::draw_label(startYear + 45, x = 0.098, y = 0.742, colour = "#929299", size = 6) + # 1991
-  cowplot::draw_label(startYear + 60, x = 0.087, y = 0.82, colour = "#929299", size = 6) + # 2006
+  cowplot::draw_label(startYear, x = 0.140 + shift, y = 0.856, colour = "#929299", size = 6) + # 1946
+  cowplot::draw_label(startYear + 15, x = 0.163 + shift, y = 0.815, colour = "#929299", size = 6) + # 1961
+  cowplot::draw_label(startYear + 30, x = 0.162 + shift, y = 0.738, colour = "#929299", size = 6) + # 1976
+  cowplot::draw_label(startYear + 45, x = 0.098 + shift, y = 0.742, colour = "#929299", size = 6) + # 1991
+  cowplot::draw_label(startYear + 60, x = 0.087 + shift, y = 0.82, colour = "#929299", size = 6) + # 2006
   cowplot::draw_plot(legend, .47, .89, .55, .08) +
   cowplot::draw_label("UK votes Yes\nvs No or abstain", x = 0.585, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
   cowplot::draw_label("UK votes\nthe same", x = 0.72, y = 0.935, colour = "#929299", size = 8, hjust = 1) +
-  cowplot::draw_label("UK votes No or abstains\nvs Yes", x = 0.859, y = 0.937, colour = "#929299", size = 8, hjust = 1)
+  cowplot::draw_label("UK votes No or abstains\nvs Yes", x = 0.862, y = 0.937, colour = "#929299", size = 8, hjust = 1)
